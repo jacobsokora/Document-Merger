@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Document_Merger
 {
@@ -10,15 +11,40 @@ namespace Document_Merger
             Console.WriteLine("Document Merger");
             do
             {
-                string doc1 = GetValidDocument();
-                string doc2 = GetValidDocument();
-                string mergedFileName = doc1.Substring(0, doc1.Length - 4) + doc2;
+                List<string> documents = new List<string>();
+                while (documents.Count < 2)
+                {
+                    string doc = GetValidDocument();
+                    if (doc.Length == 0)
+                    {
+                        if (documents.Count < 2)
+                        {
+                            Console.WriteLine("You can't merge one document, silly!");
+                        }
+                    }
+                    else
+                    {
+                        documents.Add(doc);
+                    }
+                }
+                string mergedFileName = "";
+                foreach (string doc in documents)
+                {
+                    mergedFileName += doc.Substring(0, doc.Length - 4);
+                }
+                mergedFileName += ".txt";
+                Console.Write("Enter new file name (default: {0}): ", mergedFileName);
+                string option = Console.ReadLine();
+                mergedFileName = option.Length == 0 ? mergedFileName : option;
                 StreamWriter writer = null;
                 try
                 {
                     writer = new StreamWriter(mergedFileName);
-                    int count = WriteFileContents(writer, doc1);
-                    count += WriteFileContents(writer, doc2);
+                    int count = 0;
+                    foreach (string doc in documents)
+                    {
+                        count += WriteFileContents(writer, doc);
+                    }
                     Console.WriteLine("{0} was successfully saved. The document contains {1} characters", mergedFileName);
                 }
                 catch (Exception e)
@@ -32,7 +58,7 @@ namespace Document_Merger
                         writer.Close();
                     }
                 }
-                Console.Write("\nWould you like to merge two more documents? (y/n): ");
+                Console.Write("\nWould you like to merge more documents? (y/n): ");
             }
             while (Console.ReadLine().ToLower() == "y");
         }
@@ -41,7 +67,7 @@ namespace Document_Merger
         {
             Console.Write("Enter the name of a document: ");
             string doc;
-            while ((doc = Console.ReadLine()).Length == 0 || !File.Exists(doc))
+            while ((doc = Console.ReadLine()).Length > 0 && !File.Exists(doc))
             {
                 Console.Write("Document not found, please enter a valid document name: ");
             }
@@ -77,3 +103,4 @@ namespace Document_Merger
         }
     }
 }
+r
